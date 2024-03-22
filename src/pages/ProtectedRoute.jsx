@@ -8,10 +8,11 @@ const ProtectedRoute = () => {
   const [isAuth, setIsAuth] = useState();
   useEffect(() => {
     // onAuthStateChanged kullanıcı oturmununun değişimini izler actıgını veya kapattığını
-    onAuthStateChanged(auth, (user) => {
+    const unsub = onAuthStateChanged(auth, (user) => {
       // Kullanıcı  oturum açtıysa yetkiyi true ya kapattıysa false a çekiyoruz
       setIsAuth(user ? true : false);
     });
+    return () => unsub();
   }, []);
   // eğer yetkisi yoksa logine yönlendir
   if (isAuth === false) {
