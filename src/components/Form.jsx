@@ -1,8 +1,62 @@
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { BsCardImage } from "react-icons/bs";
-
+import { toast } from "react-toastify";
+import { db, storage } from "../firebase/config";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { v4 } from "uuid";
 const Form = ({ user }) => {
+  //Tweets collection un referansını al
+  const tweetsCol = collection(db, "tweets");
+
+  //Dosya resimse resmi storage yukler ve resmin url ni fonsiyonunn çağrıldıgı yere döndürür.
+  const uploadImage = async (file) => {
+    //Dosya resim değilse Fonksiyonu durdur
+    if (!file && !file.type.startsWith("image")) return null;
+
+    //dosyanın yükleneceği konumun referansını alma
+    const fileRef = ref(storage, v4() + file.name);
+
+    //referansını olusturdugumuz konuma Dosyayı yukle
+    await uploadBytes(fileRef, file);
+
+    //yüklenen dosyanın Url ine eriş
+    return await getDownloadURL(fileRef);
+  };
+
+  //form Gönderildiğinde
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    //İnputlardaki verilere eriş
+    const textContent = e.target[0].value;
+    const imageContent = e.target[1].files[0];
+
+    //Yazı ve resim içeriği yoksa uyarı ver
+    if (!textContent && imageContent) {
+      return toast.info("Lütfen İçerik Giriniz");
+    }
+    // Resmi storage yükle
+    const url = await uploadImage(imageContent);
+    console.log(url);
+
+    //Yeni tweet dökümanını kolleksiyona ekle
+    await addDoc(tweetsCol, {
+      textContent,
+      imageContent: url,
+      createdAt: serverTimestamp(),
+      likes: [],
+      isEdited: false,
+      user: {
+        id: user.uid,
+        name: user.displayName,
+        photo: user.photoURL,
+      },
+    });
+  };
   return (
-    <form className="flex gap-3 border-b  border-zinc-600 p-4">
+    <form
+      onSubmit={handleSubmit}
+      className="flex gap-3 border-b  border-zinc-600 p-4"
+    >
       <img
         className="rounded-full h-[35px] md:h-[45px] mt-1"
         src={user?.photoURL}
