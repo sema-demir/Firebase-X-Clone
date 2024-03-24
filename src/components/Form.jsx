@@ -11,7 +11,7 @@ const Form = ({ user }) => {
   //Dosya resimse resmi storage yukler ve resmin url ni fonsiyonunn çağrıldıgı yere döndürür.
   const uploadImage = async (file) => {
     //Dosya resim değilse Fonksiyonu durdur
-    if (!file && !file.type.startsWith("image")) return null;
+    if (!file || !file.type.startsWith("image")) return null;
 
     //dosyanın yükleneceği konumun referansını alma
     const fileRef = ref(storage, v4() + file.name);
@@ -31,12 +31,11 @@ const Form = ({ user }) => {
     const imageContent = e.target[1].files[0];
 
     //Yazı ve resim içeriği yoksa uyarı ver
-    if (!textContent && imageContent) {
+    if (!textContent && !imageContent) {
       return toast.info("Lütfen İçerik Giriniz");
     }
     // Resmi storage yükle
     const url = await uploadImage(imageContent);
-    console.log(url);
 
     //Yeni tweet dökümanını kolleksiyona ekle
     await addDoc(tweetsCol, {
@@ -51,7 +50,10 @@ const Form = ({ user }) => {
         photo: user.photoURL,
       },
     });
+    //formu temizle
+    e.target.reset();
   };
+
   return (
     <form
       onSubmit={handleSubmit}
