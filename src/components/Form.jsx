@@ -4,7 +4,11 @@ import { toast } from "react-toastify";
 import { db, storage } from "../firebase/config";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 } from "uuid";
+import { useState } from "react";
+import Loader from "./Loader";
 const Form = ({ user }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   //Tweets collection un referansını al
   const tweetsCol = collection(db, "tweets");
 
@@ -26,6 +30,7 @@ const Form = ({ user }) => {
   //form Gönderildiğinde
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     //İnputlardaki verilere eriş
     const textContent = e.target[0].value;
     const imageContent = e.target[1].files[0];
@@ -34,22 +39,32 @@ const Form = ({ user }) => {
     if (!textContent && !imageContent) {
       return toast.info("Lütfen İçerik Giriniz");
     }
-    // Resmi storage yükle
-    const url = await uploadImage(imageContent);
+    //yüklenme state ini true ya cek
+    setIsLoading(true);
 
-    //Yeni tweet dökümanını kolleksiyona ekle
-    await addDoc(tweetsCol, {
-      textContent,
-      imageContent: url,
-      createdAt: serverTimestamp(),
-      likes: [],
-      isEdited: false,
-      user: {
-        id: user.uid,
-        name: user.displayName,
-        photo: user.photoURL,
-      },
-    });
+    try {
+      // Resmi storage yükle
+      const url = await uploadImage(imageContent);
+
+      //Yeni tweet dökümanını kolleksiyona ekle
+      await addDoc(tweetsCol, {
+        textContent,
+        imageContent: url,
+        createdAt: serverTimestamp(),
+        likes: [],
+        isEdited: false,
+        user: {
+          id: user.uid,
+          name: user.displayName,
+          photo: user.photoURL,
+        },
+      });
+    } catch (err) {
+      console.log(err);
+    }
+    //yuklenme bittikten sonra false cek
+    setIsLoading(false);
+
     //formu temizle
     e.target.reset();
   };
@@ -85,7 +100,14 @@ const Form = ({ user }) => {
             type="submit"
             className="bg-blue-600 flex items-center justify-center px-4 py-2 min-w-[85px] min-h-[40px] rounded-full transition hover:bg-blue-800"
           >
-            Tweetle
+            {isLoading ? (
+              <>
+                <Loader styles={`!text-white`} />
+                <span className="text-[10px] ms-2">Yükleniyor</span>
+              </>
+            ) : (
+              " Tweetle"
+            )}
           </button>
         </div>
       </div>
