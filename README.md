@@ -16,3 +16,6 @@ twit silme
 twit güncelleme
 twite media özellikleri eklme
 twit like atma gibi özellikleri mevcuttur
+Twit silme
+twit düzenleme
+gibi özellikleri mevcuttur
