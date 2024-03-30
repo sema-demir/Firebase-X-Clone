@@ -12,6 +12,16 @@ body {
   display: grid;
   grid-template-columns: 1fr minmax(400px, 600px) 1fr;
 }
+
+*::-webkit-scrollbar {
+  background: transparent;
+  width: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #616161;
+}
+
 /* The design is inspired from the mockapi.io */
 
 .popup {

@@ -1,11 +1,14 @@
-import { RiPencilFill } from "react-icons/ri";
+import { FiEdit2 } from "react-icons/fi";
 import { FaTrashCan } from "react-icons/fa6";
+import { useRef } from "react";
 
-const Dropdown = ({ handleDelete }) => {
+const Dropdown = ({ handleDelete, handleEdit }) => {
+  const inputRef = useRef();
+
   return (
     <>
       <label className="popup">
-        <input type="checkbox" />
+        <input ref={inputRef} type="checkbox" />
         <div className="burger" tabindex="0">
           <span></span>
           <span></span>
@@ -15,16 +18,21 @@ const Dropdown = ({ handleDelete }) => {
           <legend>Aksiyonlar</legend>
           <ul>
             <li>
-              <button>
-                <RiPencilFill />
-                <span>Edit</span>
+              <button
+                onClick={() => {
+                  handleEdit();
+                  inputRef.current.checked = false;
+                }}
+              >
+                <FiEdit2 />
+                <span>Düzenle</span>
               </button>
             </li>
             <hr />
             <li>
               <button onClick={handleDelete}>
                 <FaTrashCan />
-                <span>Delete</span>
+                <span>Sil</span>
               </button>
             </li>
           </ul>

@@ -11,7 +11,11 @@ import {
   arrayUnion,
 } from "firebase/firestore";
 import { toast } from "react-toastify";
+import { useState } from "react";
+import EditMode from "./EditMode";
+import Content from "./Content";
 const Post = ({ tweet }) => {
+  const [isEditMode, setIsEditMode] = useState(false);
   //güncel tarih alma ve ...zaman önce gibi
   const date = moment(tweet?.createdAt?.toDate()).fromNow();
 
@@ -44,7 +48,7 @@ const Post = ({ tweet }) => {
         : arrayUnion(auth.currentUser.uid), // like yoksa ekle
     });
   };
-
+  console.log(isEditMode);
   return (
     <div className="border-b py-6 px-3 border-zinc-600 flex gap-3">
       <img
@@ -59,7 +63,7 @@ const Post = ({ tweet }) => {
           <div className="flex gap-3 items-center whitespace-nowrap">
             <p className="font-semibold">{tweet.user.name}</p>
             <p className="text-gray-400 text-sm">
-              @{tweet.user.name.toLowerCase().split(" ").join("_")}
+              @{tweet.user.name?.toLowerCase().split(" ").join("_")}
             </p>
             <p className="text-gray-400 text-sm">{date}</p>
             {tweet.isEdited && (
@@ -67,18 +71,19 @@ const Post = ({ tweet }) => {
             )}
           </div>
           {tweet.user.id === auth.currentUser.uid && (
-            <Dropdown handleDelete={handleDelete} />
+            <Dropdown
+              handleEdit={() => setIsEditMode(true)}
+              handleDelete={handleDelete}
+            />
           )}
         </div>
 
         {/* orta kısım */}
         <div className="my-4">
-          {tweet.textContent && <p>{tweet.textContent} </p>}
-          {tweet.imageContent && (
-            <img
-              className="max-h-[400px] object-cover w-full rounded-lg my-2"
-              src={tweet.imageContent}
-            />
+          {isEditMode ? (
+            <EditMode tweet={tweet} close={() => setIsEditMode(false)} />
+          ) : (
+            <Content tweet={tweet} />
           )}
         </div>
 
